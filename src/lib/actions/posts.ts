@@ -327,6 +327,27 @@ export async function autosavePost(
   }
 }
 
+/**
+ * Lightweight AEO-only save used by Bulk AEO.
+ * Writes only the aeoMetadata column — does not touch revisions, revalidate
+ * paths, or run plugin hooks. Returns ok/error for client-side progress tracking.
+ */
+export async function bulkSaveAeo(
+  postId: number,
+  aeoMetadata: Record<string, unknown>,
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    await requireAdminOrEditor();
+    await db
+      .update(posts)
+      .set({ aeoMetadata, updatedAt: new Date() } as Partial<typeof posts.$inferInsert>)
+      .where(eq(posts.id, postId));
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Save failed" };
+  }
+}
+
 export async function deletePost(id: number) {
   const user = await requireAdminOrEditor();
   await loadPlugins();

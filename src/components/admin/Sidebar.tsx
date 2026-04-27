@@ -26,6 +26,7 @@ const contentSubItems = [
   { label: "Categories", path: "/admin/categories" },
   { label: "Tags", path: "/admin/tags" },
   { label: "Media", path: "/admin/media" },
+  { label: "Bulk AEO", path: "/admin/posts/bulk-aeo" },
 ];
 
 // designSubItems is now built dynamically from the themes prop — see render below
@@ -41,7 +42,7 @@ const settingsSubItems = [
   { label: "API Keys", path: "/admin/settings/api-keys" },
 ];
 
-const contentSection = ["/admin/posts", "/admin/categories", "/admin/tags", "/admin/media"];
+const contentSection = ["/admin/posts", "/admin/categories", "/admin/tags", "/admin/media", "/admin/posts/bulk-aeo"];
 const designSection = ["/admin/themes", "/admin/design", "/admin/design/header-footer", "/admin/design/layout", "/admin/design/colors", "/admin/design/typography", "/admin/design/widget-areas", "/admin/design/widgets", "/admin/design/navigation", "/admin/design/social"];
 const settingsSection = ["/admin/settings", "/admin/users"];
 
