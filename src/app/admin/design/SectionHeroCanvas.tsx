@@ -515,6 +515,12 @@ export default function SectionHeroCanvas({ section, onChange, allMedia }: Props
             </div>
           )}
         </div>
+        {!section.imageUrl && (
+          <p className="mt-2 text-xs text-zinc-400">
+            Background color is set by the <strong className="text-zinc-500">Accent</strong> color in{" "}
+            <a href="/admin/design/colors" className="underline hover:text-zinc-600">Design › Colors</a>.
+          </p>
+        )}
       </div>
 
       {/* Control panel */}
