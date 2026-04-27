@@ -10,7 +10,7 @@
 
 import type { DesignTokenDef, ColorPreset } from "../../src/types/design";
 import type { WidgetAreaDef } from "../../src/types/widget";
-import type { HeaderLayoutDef, HeaderModifiers } from "../../src/types/theme";
+import type { HeaderLayoutDef, HeaderModifiers, FooterLayoutDef } from "../../src/types/theme";
 
 // ─── Layout config types ───────────────────────────────────────────────────────
 
@@ -63,6 +63,11 @@ export const HEADER_MODIFIERS: HeaderModifiers = {
   supportsCompactHeight: true,
   supportsLogo: false,  // Mono renders the site name as text only
 };
+
+export const FOOTER_LAYOUTS: FooterLayoutDef[] = [
+  { id: "simple",   label: "Simple",   description: "Nav row + copyright left, social right" },
+  { id: "minimal",  label: "Minimal",  description: "Copyright line only" },
+];
 
 // ─── Font allowlists ───────────────────────────────────────────────────────────
 

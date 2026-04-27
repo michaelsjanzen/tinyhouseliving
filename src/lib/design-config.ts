@@ -28,6 +28,9 @@ export function loadThemeDesignDefs(themeId: string): {
   SANS_FONTS: string[];
   MONO_FONTS: string[];
   COLOR_PRESETS: import("@/types/design").ColorPreset[];
+  HEADER_LAYOUTS: import("@/types/theme").HeaderLayoutDef[];
+  HEADER_MODIFIERS: import("@/types/theme").HeaderModifiers | null;
+  FOOTER_LAYOUTS: import("@/types/theme").FooterLayoutDef[];
 } {
   const design = getThemeDesign(themeId);
   return {
@@ -36,6 +39,9 @@ export function loadThemeDesignDefs(themeId: string): {
     SANS_FONTS: design.SANS_FONTS,
     MONO_FONTS: design.MONO_FONTS,
     COLOR_PRESETS: design.COLOR_PRESETS ?? [],
+    HEADER_LAYOUTS: design.HEADER_LAYOUTS ?? [],
+    HEADER_MODIFIERS: design.HEADER_MODIFIERS ?? null,
+    FOOTER_LAYOUTS: design.FOOTER_LAYOUTS ?? [],
   };
 }
 

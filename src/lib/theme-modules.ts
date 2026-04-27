@@ -24,7 +24,7 @@
 
 import type React from "react";
 import type { DesignTokenDef, ColorPreset } from "@/types/design";
-import type { HeaderLayoutDef, HeaderModifiers } from "@/types/theme";
+import type { HeaderLayoutDef, HeaderModifiers, FooterLayoutDef } from "@/types/theme";
 import type { HomepageSection } from "@/types/homepage-sections";
 
 // ─── Default theme ─────────────────────────────────────────────────────────────
@@ -43,6 +43,7 @@ import {
   COLOR_PRESETS as DefaultColorPresets,
   HEADER_LAYOUTS as DefaultHeaderLayouts,
   HEADER_MODIFIERS as DefaultHeaderModifiers,
+  FOOTER_LAYOUTS as DefaultFooterLayouts,
   buildCssString as defaultBuildCssString,
   buildGoogleFontsUrl as defaultBuildGoogleFontsUrl,
 } from "../../themes/default/design";
@@ -63,6 +64,7 @@ import {
   COLOR_PRESETS as EditorialColorPresets,
   HEADER_LAYOUTS as EditorialHeaderLayouts,
   HEADER_MODIFIERS as EditorialHeaderModifiers,
+  FOOTER_LAYOUTS as EditorialFooterLayouts,
   buildCssString as editorialBuildCssString,
   buildGoogleFontsUrl as editorialBuildGoogleFontsUrl,
 } from "../../themes/editorial/design";
@@ -83,6 +85,7 @@ import {
   COLOR_PRESETS as MonoColorPresets,
   HEADER_LAYOUTS as MonoHeaderLayouts,
   HEADER_MODIFIERS as MonoHeaderModifiers,
+  FOOTER_LAYOUTS as MonoFooterLayouts,
   buildCssString as monoBuildCssString,
   buildGoogleFontsUrl as monoBuildGoogleFontsUrl,
 } from "../../themes/mono/design";
@@ -98,6 +101,7 @@ export interface ThemeDesignModule {
   COLOR_PRESETS?: ColorPreset[];
   HEADER_LAYOUTS?: HeaderLayoutDef[];
   HEADER_MODIFIERS?: HeaderModifiers;
+  FOOTER_LAYOUTS?: FooterLayoutDef[];
   buildCssString: (config: Record<string, string>, defs: DesignTokenDef[]) => string;
   buildGoogleFontsUrl: (config: Record<string, string>) => string | null;
 }
@@ -130,6 +134,7 @@ const THEME_MODULES: Record<string, ThemeModuleSet> = {
       COLOR_PRESETS: DefaultColorPresets,
       HEADER_LAYOUTS: DefaultHeaderLayouts,
       HEADER_MODIFIERS: DefaultHeaderModifiers,
+      FOOTER_LAYOUTS: DefaultFooterLayouts,
       buildCssString: defaultBuildCssString,
       buildGoogleFontsUrl: defaultBuildGoogleFontsUrl,
     },
@@ -149,6 +154,7 @@ const THEME_MODULES: Record<string, ThemeModuleSet> = {
       COLOR_PRESETS: EditorialColorPresets,
       HEADER_LAYOUTS: EditorialHeaderLayouts,
       HEADER_MODIFIERS: EditorialHeaderModifiers,
+      FOOTER_LAYOUTS: EditorialFooterLayouts,
       buildCssString: editorialBuildCssString,
       buildGoogleFontsUrl: editorialBuildGoogleFontsUrl,
     },
@@ -168,6 +174,7 @@ const THEME_MODULES: Record<string, ThemeModuleSet> = {
       COLOR_PRESETS: MonoColorPresets,
       HEADER_LAYOUTS: MonoHeaderLayouts,
       HEADER_MODIFIERS: MonoHeaderModifiers,
+      FOOTER_LAYOUTS: MonoFooterLayouts,
       buildCssString: monoBuildCssString,
       buildGoogleFontsUrl: monoBuildGoogleFontsUrl,
     },

@@ -9,7 +9,7 @@
 
 import type { DesignTokenDef, ColorPreset } from "../../src/types/design";
 import type { WidgetAreaDef } from "../../src/types/widget";
-import type { HeaderLayoutDef, HeaderModifiers } from "../../src/types/theme";
+import type { HeaderLayoutDef, HeaderModifiers, FooterLayoutDef } from "../../src/types/theme";
 
 // ─── Layout config types ───────────────────────────────────────────────────────
 // Identical shape to default — routes import from their active theme's design.ts.
@@ -60,10 +60,17 @@ export const HEADER_LAYOUTS: HeaderLayoutDef[] = [
 
 export const HEADER_MODIFIERS: HeaderModifiers = {
   supportsSticky: true,
-  supportsBackgroundStyles: ["solid", "transparent-on-hero"],
+  supportsBackgroundStyles: ["solid", "glass"],
   supportsCompactHeight: false,  // Editorial header always has generous padding
   supportsLogo: true,
 };
+
+export const FOOTER_LAYOUTS: FooterLayoutDef[] = [
+  { id: "simple",   label: "Simple",   description: "Nav row + copyright left, social right" },
+  { id: "centered", label: "Centered", description: "All content centered" },
+  { id: "columns",  label: "Columns",  description: "Site info left, nav + social right" },
+  { id: "minimal",  label: "Minimal",  description: "Copyright line only" },
+];
 
 // ─── Font allowlists ───────────────────────────────────────────────────────────
 

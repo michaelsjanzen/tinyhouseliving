@@ -42,7 +42,7 @@ const settingsSubItems = [
 ];
 
 const contentSection = ["/admin/posts", "/admin/categories", "/admin/tags", "/admin/media"];
-const designSection = ["/admin/themes", "/admin/design", "/admin/design/layout", "/admin/design/colors", "/admin/design/typography", "/admin/design/widget-areas", "/admin/design/widgets", "/admin/design/navigation", "/admin/design/social"];
+const designSection = ["/admin/themes", "/admin/design", "/admin/design/header-footer", "/admin/design/layout", "/admin/design/colors", "/admin/design/typography", "/admin/design/widget-areas", "/admin/design/widgets", "/admin/design/navigation", "/admin/design/social"];
 const settingsSection = ["/admin/settings", "/admin/users"];
 
 function SubNav({ items }: { items: { label: string; path: string; exact?: boolean }[] }) {
@@ -192,9 +192,10 @@ export default function Sidebar({ isOpen, onClose, plugins = [], themes = [], ba
                     Themes
                   </Link>
                   {[
-                    { label: "Homepage",     href: "/admin/design",              exact: true },
-                    { label: "Layout",       href: "/admin/design/layout" },
-                    { label: "Colors",       href: "/admin/design/colors" },
+                    { label: "Homepage",       href: "/admin/design",                    exact: true },
+                    { label: "Header & Footer", href: "/admin/design/header-footer" },
+                    { label: "Layout",         href: "/admin/design/layout" },
+                    { label: "Colors",         href: "/admin/design/colors" },
                     { label: "Typography",   href: "/admin/design/typography" },
                     { label: "Widget Areas", href: "/admin/design/widget-areas" },
                     { label: "Navigation",   href: "/admin/design/navigation" },

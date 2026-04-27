@@ -31,3 +31,14 @@ export interface HeaderModifiers {
   /** Logo image upload in addition to text site name. */
   supportsLogo: boolean;
 }
+
+/**
+ * A single footer layout preset a theme supports.
+ * The admin reads this array and renders one tile per entry.
+ * The theme's Footer component switches on the saved footerLayout value.
+ */
+export interface FooterLayoutDef {
+  id: string;
+  label: string;
+  description?: string;
+}

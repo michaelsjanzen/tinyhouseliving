@@ -43,6 +43,11 @@ export default async function SocialLinksPage({ searchParams }: { searchParams: 
       description="Add links to your social profiles. Drag to reorder. Icons are shown automatically based on the platform."
       saved={saved}
     >
+      <div className="bg-zinc-50 border border-zinc-200 rounded-lg px-4 py-3 text-sm text-zinc-600">
+        Control where social icons appear (header, footer, or both) in{" "}
+        <a href="/admin/design/header-footer" className="underline hover:text-zinc-900">Design › Header &amp; Footer</a>.
+      </div>
+
       <form action={saveSocial}>
         <section className="bg-white border border-zinc-200 rounded-lg p-6 space-y-4">
           <SocialEditor initialItems={config.site.socialLinks as { platform: string; url: string }[]} />
