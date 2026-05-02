@@ -40,10 +40,9 @@ This document covers security requirements for developers and AI agents working 
 
 | Platform | Where to store secrets |
 |---|---|
+| **Replit** | Secrets tool (lock icon in the sidebar) |
 | **Local dev** | `.env.local` (gitignored) |
-| **Vercel** | Project Settings > Environment Variables |
-| **Railway / Render** | Environment Variables dashboard |
-| **Self-hosted / Other AI IDEs** | [Doppler](https://doppler.com) or [Infisical](https://infisical.com) |
+| **Self-hosted** | Set in your shell, systemd unit, Docker compose, etc. |
 
 ### Generating a NEXTAUTH_SECRET
 
@@ -73,7 +72,7 @@ Tells NextAuth to trust the `Host` request header as the authoritative URL rathe
 
 ### Why it is safe on supported platforms
 
-On Replit, Vercel, Railway, and Render, all traffic passes through the platform's own reverse proxy before reaching the app. That proxy sets the `Host` header; the app never sees a raw, user-controlled value. An external attacker cannot spoof it. NextAuth v5 explicitly recommends `trustHost: true` for proxied deployments.
+On Replit and similar managed platforms, all traffic passes through the platform's own reverse proxy before reaching the app. That proxy sets the `Host` header; the app never sees a raw, user-controlled value. An external attacker cannot spoof it. NextAuth v5 explicitly recommends `trustHost: true` for proxied deployments.
 
 ### When it would be a risk
 

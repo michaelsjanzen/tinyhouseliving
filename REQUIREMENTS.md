@@ -40,7 +40,7 @@ Pugmill is an AI-native, full-stack content management system built on Next.js. 
 | Password hashing | bcryptjs | ^3 |
 | HTML sanitization | rehype-sanitize | ^6 |
 | Rate limiting | lru-cache | ^11 |
-| Deployment target | Vercel, Railway, Render, Replit, self-hosted Node | -- |
+| Deployment target | Replit (primary), self-hosted Node | -- |
 
 ---
 
@@ -306,7 +306,7 @@ interface StorageProvider {
 
 | `STORAGE_PROVIDER` | Behavior |
 |---|---|
-| `local` (default) | Writes to `/public/uploads/`. Suitable for local dev and persistent-volume servers. Not suitable for ephemeral platforms (Vercel). |
+| `local` (default) | Writes to `/public/uploads/`. Suitable for local dev, Replit, and persistent-volume servers. Not suitable for ephemeral containers. |
 | `s3` | Uploads to any S3-compatible store: AWS S3, Cloudflare R2, DigitalOcean Spaces, MinIO. |
 
 ### 7.2 S3 environment variables
@@ -801,7 +801,7 @@ Each card links to `/admin/bot-analytics`. Empty states are shown when no data e
 
 ## 18. First-Run Setup
 
-### Standard (local / Vercel / Railway / Render)
+### Standard (Replit, local, self-hosted)
 
 ```bash
 cp .env.example .env.local      # fill in DATABASE_URL, NEXTAUTH_SECRET at minimum
@@ -842,9 +842,9 @@ The admin login page is at `/admin/login`.
 | L1 | Plugin and theme registry requires manual static imports (Turbopack limitation) | Registry CLI + dynamic discovery in v0.3 |
 | L2 | Post author not displayed in the default theme (`authorId` is stored and linked but not rendered in theme views) | Surface author in default theme in v0.3 |
 | L4 | Config cache TTL only; no real-time cross-instance invalidation | Redis pub/sub for v1.0 managed tier |
-| L6 | Scheduled posts do not auto-publish (cron endpoint exists at `/api/cron/publish-scheduled` but requires an external trigger on non-Vercel platforms) | Document cron-job.org setup; Replit background worker in v0.3 |
+| L6 | Scheduled posts do not auto-publish (cron endpoint exists at `/api/cron/publish-scheduled` but requires an external trigger) | Document cron-job.org setup; Replit background worker in v0.3 |
 | L7 | No post draft preview (design draft preview is implemented; post-level preview is not) | Deferred to v0.3 |
 | L8 | No bulk post operations | Deferred to v0.3 |
 | L9 | No Content Security Policy header | Complex due to Tailwind inline styles; v0.3 |
 | L10 | AI rate limiter uses `TIMESTAMP WITHOUT TIME ZONE` — comparisons assume consistent server timezone | Migrate to `TIMESTAMPTZ` in v0.3 |
-| L11 | Local storage (`STORAGE_PROVIDER=local`) is not suitable for ephemeral deployment containers (Replit Deployments, Vercel) — uploaded media will not persist across deploys | Configure `STORAGE_PROVIDER=s3` before deploying to ephemeral platforms |
+| L11 | Local storage (`STORAGE_PROVIDER=local`) is not suitable for ephemeral deployment containers — uploaded media will not persist across deploys | Configure `STORAGE_PROVIDER=s3` before deploying to ephemeral containers |

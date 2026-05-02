@@ -325,11 +325,10 @@ Pugmill auto-detects the storage backend. In most cases you don't need to set `S
 
 | Provider | When active | Setup |
 |---|---|---|
-| `vercel-blob` **(recommended on Vercel)** | `BLOB_READ_WRITE_TOKEN` is set | Create a Blob store in the Vercel dashboard; the token is injected automatically |
-| `local` (default for dev) | No other provider detected | Zero config; files saved to `public/uploads/`. Ephemeral on serverless — dev only |
+| `local` (default) | No other provider detected | Zero config; files saved to `public/uploads/`. Persistent on Replit's filesystem |
 | `s3` (advanced) | `STORAGE_PROVIDER=s3` | Any S3-compatible store — AWS, R2, Supabase, DO Spaces, MinIO |
 
-Vercel Blob is the recommended production provider: one env var, no bucket/region/ACL/CORS to configure, public URLs out of the box.
+For most Replit installs, `local` is fine — Replit's filesystem persists across restarts. Use `s3` if you need media to outlive the Replit container or want CDN-backed delivery.
 
 ### S3 (advanced)
 
