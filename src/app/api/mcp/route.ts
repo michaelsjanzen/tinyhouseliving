@@ -20,7 +20,7 @@ import { ALL_TOOLS, TOOL_MAP } from "../../../../plugins/mcp-server/tools";
 
 const SERVER_INFO = {
   name:    "pugmill-cms",
-  version: "0.2.0",
+  version: "0.1.0",
 } as const;
 
 const PROTOCOL_VERSION = "2025-03-26";

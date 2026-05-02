@@ -229,8 +229,8 @@ pugmill/
 │   └── env-check.ts              # Env var validation
 ├── pugmill.config.json           # Seed config: active theme, enabled plugins
 ├── AGENT.md                      # AI agent instructions (read this first)
+├── PHILOSOPHY.md                 # Design principles for the human-AI team
 ├── CHANGELOG.md                  # Version history
-├── GUIDE.md                      # Sprint-by-sprint build guide
 ├── REQUIREMENTS.md               # Full product requirements
 └── SECURITY.md                   # Security policy
 ```

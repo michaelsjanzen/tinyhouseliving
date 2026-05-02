@@ -22,7 +22,7 @@ assignees: ''
 
 ## Environment
 
-- Pugmill version: <!-- e.g. 0.2.0 -->
+- Pugmill version: <!-- e.g. 0.1.0 -->
 - Node.js version: <!-- e.g. 22.x -->
 - Deployment: <!-- Local / Replit / Other -->
 - Browser (if UI bug): <!-- e.g. Chrome 124 -->

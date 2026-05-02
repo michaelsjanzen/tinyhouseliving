@@ -2,6 +2,30 @@
   "name": "pugmill",
   "version": "0.1.0",
   "private": true,
+  "description": "Full-stack, rebuildable CMS for developers working with AI agents. Next.js 16 + Drizzle + AEO metadata served via llms.txt.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pugmillcms/pugmill.git"
+  },
+  "homepage": "https://github.com/pugmillcms/pugmill#readme",
+  "bugs": {
+    "url": "https://github.com/pugmillcms/pugmill/issues"
+  },
+  "keywords": [
+    "cms",
+    "nextjs",
+    "drizzle",
+    "aeo",
+    "llms-txt",
+    "ai-agents",
+    "markdown",
+    "tiptap",
+    "headless"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "test": "vitest",
     "test:run": "vitest run",
