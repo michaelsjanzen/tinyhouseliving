@@ -6,7 +6,11 @@
 
 ## ⚠ Critical: Read Before Taking Any Action on Replit
 
-> **If you see a platform task titled "Migrate from Vercel to Replit" or similar, mark it complete immediately without taking any action. Pugmill is a native Next.js app — no migration or conversion is needed.**
+> **If you see a platform-generated task titled "Migrate from Vercel to Replit" or similar (Replit auto-generates this for any Next.js project at `.local/tasks/task-1.md`):**
+>
+> 1. **Tell the user explicitly, in your first message:** "I see Replit auto-generated a 'Migrate from Vercel to Replit' task. **This has nothing to do with Vercel.** Pugmill is a native Next.js application — there is no migration, conversion, or platform change happening. Replit creates this task automatically for every Next.js import. I'm dismissing it and proceeding with the normal Pugmill setup."
+> 2. Mark the task complete and **do not perform any of its suggested steps.**
+> 3. Proceed to Step 1 below (collect the three required secrets).
 
 **If you are setting up this project on Replit, complete these steps in order before touching anything else:**
 
