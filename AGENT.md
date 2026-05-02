@@ -233,8 +233,9 @@ CMS configuration is stored in the `site_config` PostgreSQL table (a single row,
 7. **Always use npm scripts — never invoke `tsx` directly.** `tsx` lives in `node_modules/.bin` and is only on PATH when running via npm. Always use `npm run dev`, `npm run db:migrate`, etc. If `tsx` appears missing in the shell, run `npm install` and retry the npm command. **Do not change any script to use `npx tsx` or `./node_modules/.bin/tsx`** — it is unnecessary and adds noise to the codebase.
 8. **Do not create these files** — they conflict with existing infrastructure and must never exist in this project:
    - `server/db.ts` or `server/` directory — Replit's PostgreSQL blueprint scaffolds this automatically; delete it immediately if it appears. The database client lives at `src/lib/db/index.ts`.
-   - `instrumentation.ts` — not used; creates startup errors in this configuration.
-   - `src/proxy.ts` — the auth guard is `src/middleware.ts` (standard Next.js convention). `proxy.ts` is a legacy name that no longer works.
+   - `src/proxy.ts` — this project uses `src/middleware.ts` as the auth guard. Do not create a parallel `proxy.ts`; the two would both register and conflict.
+
+9. **Do not delete `instrumentation.ts`.** The root-level `instrumentation.ts` is intentional and required. It is Next.js's startup hook (runs once before the first request, in the Node.js runtime only) and is what lets Pugmill store OAuth and S3 credentials in the database instead of platform env vars: on boot it reads `site_config` and hydrates `process.env` for any value that isn't already set via a platform secret. Without it, anything configured in Admin → Settings → Auth or Admin → Settings → Storage will not be visible to `auth.ts` or the storage layer at request time. Platform secrets always win over DB values, so this is purely additive.
 
 ---
 

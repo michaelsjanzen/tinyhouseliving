@@ -45,7 +45,7 @@ npm run setup
 npm run dev
 ```
 
-The admin dashboard is at [http://localhost:3000/admin](http://localhost:3000/admin).
+The admin dashboard is at [http://localhost:5000/admin](http://localhost:5000/admin).
 
 ### Useful commands
 

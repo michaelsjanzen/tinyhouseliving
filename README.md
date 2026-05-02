@@ -108,7 +108,7 @@ Required variables:
 DATABASE_URL=postgresql://user:password@localhost:5432/pugmill
 
 # NextAuth
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=http://localhost:5000
 NEXTAUTH_SECRET=your-secret-here
 
 ```
@@ -127,7 +127,7 @@ The `predev` hook auto-runs `scripts/replit-init.ts`, which creates the database
 
 Open the dev URL in a browser and visit **`/setup`**. Fill in your email, password, and name in the wizard. (Visiting `/admin/login` on a fresh install redirects there automatically.)
 
-The admin dashboard is at [http://localhost:3000/admin](http://localhost:3000/admin) once you've signed in.
+The admin dashboard is at [http://localhost:5000/admin](http://localhost:5000/admin) once you've signed in.
 
 For existing deployments after pulling schema changes:
 ```bash
