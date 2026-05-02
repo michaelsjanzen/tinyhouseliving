@@ -51,7 +51,7 @@ First public release. Intended for developers working with AI agents in Claude C
 - Security headers, Husky secret-scanning pre-commit hook.
 - Drizzle ORM + PostgreSQL 16 with idempotent migration runner (`schema_migrations` table; alphabetical scan).
 - Replit-ready: `replit-init.ts` first-run wizard with sentinel pattern, auto-generated secrets, domain detection.
-- Auth guard at `src/middleware.ts` (standard Next.js convention).
+- Auth guard at `src/middleware.ts`.
 
 ### Documentation
 
