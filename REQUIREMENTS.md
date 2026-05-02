@@ -1,8 +1,8 @@
 # Pugmill -- Product Requirements
 
-**Version:** 0.2 Public Beta
-**Status:** Public beta — suitable for production with active development ongoing
-**Last updated:** 2026-04-27
+**Version:** 0.1.0 Developer Preview
+**Status:** Developer preview — early adopters welcome; public APIs may shift before 1.0
+**Last updated:** 2026-05-02
 
 ---
 

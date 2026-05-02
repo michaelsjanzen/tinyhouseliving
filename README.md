@@ -2,7 +2,7 @@
 
 Pugmill CMS is a full-stack, rebuildable content management system for developers working with AI agents. It owns its own frontend -- a modern React/Next.js presentation layer that ships as part of the CMS, not as an afterthought. It includes an admin dashboard, a Markdown-first editor with Visual/Raw toggle, hierarchical content types, a public REST API for external consumption, and per-post AI Engine Optimization (AEO) metadata served via `llms.txt` endpoints.
 
-> **v0.2.0 Public Beta.** Intended for developers working with AI agents in Claude Code, Cursor, Replit, or similar environments.
+> **v0.1.0 Developer Preview.** Intended for developers working with AI agents in Claude Code, Cursor, Replit, or similar environments. Public APIs may shift before 1.0.
 
 > **Platform testing:** Validated on **Replit** (one-command AI agent deploy). Testing on Cursor, Claude Code, and other AI-native environments is next on the roadmap — contributions and reports welcome.
 

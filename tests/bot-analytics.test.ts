@@ -24,19 +24,20 @@ describe("BOT_CONFIG — display config completeness", () => {
     for (const [name, info] of Object.entries(BOT_CONFIG)) {
       expect(info.label, `${name}: missing label`).toBeTruthy();
       expect(info.color, `${name}: missing color`).toMatch(/^#[0-9a-f]{6}$/i);
-      expect(["ai", "search"], `${name}: invalid type`).toContain(info.type);
+      expect(["answer", "training", "search"], `${name}: invalid type`).toContain(info.type);
     }
   });
 
-  it("AI bots appear before search bots in BOT_PATTERNS", () => {
+  it("AI bots (answer + training) appear before search bots in BOT_PATTERNS", () => {
     const indices = Object.entries(BOT_CONFIG).map(([name]) => {
       const idx = BOT_PATTERNS.findIndex(p => p.canonical === name);
       return { name, idx, type: BOT_CONFIG[name].type };
     }).filter(e => e.idx !== -1);
 
-    const lastAiIdx    = Math.max(...indices.filter(e => e.type === "ai"   ).map(e => e.idx));
-    const firstSearchIdx = Math.min(...indices.filter(e => e.type === "search").map(e => e.idx));
-    expect(lastAiIdx).toBeLessThan(firstSearchIdx);
+    const aiIdxs     = indices.filter(e => e.type === "answer" || e.type === "training").map(e => e.idx);
+    const searchIdxs = indices.filter(e => e.type === "search").map(e => e.idx);
+    if (aiIdxs.length === 0 || searchIdxs.length === 0) return; // trivially satisfied
+    expect(Math.max(...aiIdxs)).toBeLessThan(Math.min(...searchIdxs));
   });
 });
 
