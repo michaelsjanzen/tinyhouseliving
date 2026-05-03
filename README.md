@@ -85,6 +85,17 @@ Community recipes are listed at the [Pugmill community directory](https://github
 - PostgreSQL 16 database
 - (Optional) AWS S3-compatible bucket for media storage
 
+### Recommended install on Replit (do not use "Import from GitHub")
+
+Replit's **Import from GitHub** button tries to auto-classify the imported repo as a Replit "artifact" (slides, mockup, etc.) and overwrites the `.replit` file in the process. This breaks Pugmill's deploy configuration and confuses the agent in the new workspace.
+
+**Use this flow instead:**
+
+1. Create a **new blank Replit project** (Node.js template).
+2. In the Replit chat, send this prompt to the agent:
+   > Install Pugmill CMS from https://github.com/pugmillcms/pugmill — clone the repo into the workspace root (overwriting any default files including `.replit`), run `npm install`, provision a PostgreSQL database, and start the dev server. After it's running, open `/setup` so I can create my admin account.
+3. Once Pugmill is running, set `PRODUCTION_URL` as a secret (see Deploying to Production below) and click **Publish**.
+
 ### 1. Clone and install
 
 ```bash
@@ -142,9 +153,15 @@ Two steps are required before a production deployment works correctly.
 
 ### 0. Verify `.replit` has a `[deployment]` section
 
-If you imported the repo via Replit's **Import from GitHub** button, you're already set — skip to Step 1. The repo ships with a correct `[deployment]` block.
+If you followed the **Recommended install** flow above (blank Repl + agent prompt to clone), you're already set — the cloned `.replit` ships with a correct `[deployment]` block.
 
-If Replit reports **"Invalid run command"** when you click Publish, your `.replit` is missing the deployment config. This can happen if the project was assembled in a non-standard way (blank Repl with code pasted in, partial clone, AI-agent setup that recreated `.replit` from scratch). Open `.replit` and confirm it contains:
+If Replit reports **"Publishing not available"** or **"Invalid run command"** when you click Publish, the workspace `.replit` is missing or has been overwritten by Replit's project template. This commonly happens when:
+
+- You used **Import from GitHub** (Replit's importer overwrites `.replit` with a generated one).
+- An agent recreated `.replit` from scratch instead of cloning it from the repo.
+- The project was assembled by pasting code into a blank Repl without copying `.replit`.
+
+Open `.replit` and confirm it contains:
 
 ```toml
 [deployment]
@@ -152,6 +169,8 @@ deploymentTarget = "autoscale"
 build = ["npm", "run", "build"]
 run  = ["npm", "run", "start"]
 ```
+
+**Do not** create an `artifact.toml` — Pugmill is a standard Next.js app, not a Replit artifact. If an agent suggests registering Pugmill as an artifact, stop it; the fix is to add the `[deployment]` block above to `.replit`.
 
 If the section is missing, ask Replit's agent to "configure deployment as autoscale with build `npm run build` and run `npm run start`" — it will write the section through the proper tool. (Direct edits to `.replit` are blocked by the platform.)
 

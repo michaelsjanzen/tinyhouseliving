@@ -322,9 +322,17 @@ Three steps are required before a production deployment works correctly:
 
 **0. Configure the `[deployment]` section in `.replit`.**
 
-Replit's Publish flow needs an explicit `[deployment]` block. The repo ships with one, but a fresh agent-driven setup may overwrite `.replit` without it (the platform blocks direct file writes to `.replit`, so when an agent recreates the workflow config it can drop the deploy block). If absent, Publish fails with **"Invalid run command"** before any build is attempted.
+Replit's Publish flow needs an explicit `[deployment]` block. The repo ships with one, but it can go missing in several scenarios. If absent, Publish fails with **"Publishing not available"** or **"Invalid run command"** before any build is attempted.
 
-Use Replit's `deployConfig` tool — never edit `.replit` directly:
+Common causes of a missing `[deployment]` block:
+
+- The user used Replit's **Import from GitHub** button (the importer overwrites `.replit` with a generated artifact-style config). The README's "Recommended install on Replit" section instructs humans to use a blank Repl + agent-clone flow instead — if you find yourself in an Import-from-GitHub workspace, your first job is to restore `.replit` from the cloned repo, not to register Pugmill as an artifact.
+- An earlier agent recreated `.replit` from scratch instead of preserving the cloned one.
+- The project was assembled by pasting code into a blank Repl without copying `.replit`.
+
+**Do not** create an `artifact.toml`. Pugmill is a standard Next.js app, not a Replit artifact. If you find yourself reaching for `artifact.toml`, `verifyAndReplaceArtifactToml`, or any artifact-registration tool, stop — the correct fix is the `[deployment]` block below.
+
+Use Replit's `deployConfig` tool — never edit `.replit` directly (direct writes are blocked):
 
 ```javascript
 await deployConfig({
