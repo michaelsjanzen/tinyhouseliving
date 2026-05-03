@@ -24,7 +24,7 @@ Only hooks defined in `src/lib/hook-catalogue.ts` may be used. Hook names follow
 Plugin `actions.ts` files must call `await loadPlugins()` as their first line. Server actions run in a separate request context where `initialize()` may not have run.
 
 **AUTH CHECKS IN EVERY PRIVILEGED OPERATION**
-Call `getCurrentUser()` and check role in every server action and server component that accesses protected data. Never rely on middleware alone.
+Call `getCurrentUser()` and check role in every server action and server component that accesses protected data. Never rely on the auth proxy alone.
 
 **BUILT-IN VS ENHANCED**
 Every feature must work fully without an AI provider configured. AI capabilities are additive — they appear when `config.ai.provider` is set. Never gate core functionality behind AI availability.

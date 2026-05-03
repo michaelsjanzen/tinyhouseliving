@@ -378,7 +378,7 @@ The full security guide is in `SECURITY.md`.
 
 | Control | Implementation |
 |---|---|
-| Authentication | NextAuth JWT; middleware protects `/admin/*` |
+| Authentication | NextAuth JWT; `src/proxy.ts` protects `/admin/*` |
 | Password hashing | bcryptjs, 12 rounds |
 | Input validation | Zod schemas on all server actions |
 | HTML sanitization | rehype-sanitize on Markdown rendering |

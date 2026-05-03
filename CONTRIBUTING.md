@@ -77,7 +77,7 @@ pugmill/
 │   │   ├── hook-catalogue.ts  # Single source of truth for all hooks
 │   │   ├── hooks/           # HookManager implementation
 │   │   ├── auth.ts          # NextAuth configuration (full, server-only)
-│   │   ├── auth.config.ts   # NextAuth edge-compatible subset (middleware)
+│   │   ├── auth.config.ts   # NextAuth edge-compatible subset (used by src/proxy.ts)
 │   │   └── config.ts        # DB-backed site config with cache
 │   └── types/               # TypeScript module augmentation
 ├── plugins/                 # Optional, activatable features
@@ -157,7 +157,7 @@ The complete guide is in [`THEME_AUTHORING.md`](./THEME_AUTHORING.md). Starting 
 
 - Secrets come from environment variables only.
 - All user input is validated with Zod before processing.
-- Admin routes require auth checks via `getCurrentUser()` -- middleware alone is not sufficient.
+- Admin routes require auth checks via `getCurrentUser()` -- the auth proxy alone is not sufficient.
 - The full security policy is in [`SECURITY.md`](./SECURITY.md).
 
 ### Style

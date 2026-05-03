@@ -12,9 +12,9 @@ import AdminShell from "@/components/admin/AdminShell";
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
 
-  // Middleware handles the redirect for all non-login admin routes.
-  // This fallback covers the login page itself (no AdminShell needed)
-  // and provides defence-in-depth if middleware is bypassed.
+  // The auth proxy (src/proxy.ts) handles the redirect for all non-login
+  // admin routes. This fallback covers the login page itself (no AdminShell
+  // needed) and provides defence-in-depth if the proxy is bypassed.
   if (!user) {
     return <>{children}</>;
   }
