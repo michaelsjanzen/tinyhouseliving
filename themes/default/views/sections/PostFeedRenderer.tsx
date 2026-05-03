@@ -22,6 +22,11 @@ export async function PostFeedRenderer({ section, page = 1, basePath = "/" }: Pr
     page,
     categorySlug: section.categorySlug || undefined,
     limit: section.limit || 0,
+    // Hide featured posts from the homepage post-feed — they appear in the
+    // dedicated Featured Post section instead and shouldn't double up.
+    // /blog, /category, and /tag listings continue to include featured posts
+    // since those are filtered views the reader chose.
+    excludeFeatured: true,
   });
 
   if (postPage.posts.length === 0) return null;

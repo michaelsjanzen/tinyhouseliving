@@ -19,6 +19,12 @@ interface FetchOptions {
   tagSlug?: string;
   /** Exclude this post id (used to remove the featured post from the feed) */
   excludeId?: number;
+  /** When true, omit any post with featured=true. Used by the homepage
+   *  PostFeedRenderer so that featured posts only appear in the dedicated
+   *  Featured Post section and don't duplicate into the regular feed.
+   *  Category, tag, and /blog listings should leave this false so users
+   *  browsing a filtered view still see the featured post. */
+  excludeFeatured?: boolean;
   /** Override the default page size. 0 or undefined = use PAGE_SIZE. */
   limit?: number;
 }
@@ -41,6 +47,7 @@ export async function fetchPostPage({
   categorySlug,
   tagSlug,
   excludeId,
+  excludeFeatured = false,
   limit,
 }: FetchOptions = {}): Promise<PostPage> {
   const pageSize = (limit && limit > 0) ? limit : PAGE_SIZE;
@@ -51,6 +58,10 @@ export async function fetchPostPage({
     eq(posts.published, true),
     eq(posts.type, "post"),
   );
+
+  // Shared optional clauses applied across every branch below.
+  const idExclusion       = excludeId ? sql`${posts.id} != ${excludeId}` : undefined;
+  const featuredExclusion = excludeFeatured ? eq(posts.featured, false) : undefined;
 
   // ── Category-filtered query ────────────────────────────────────────────────
   if (categorySlug) {
@@ -67,7 +78,8 @@ export async function fetchPostPage({
           .from(postCategories)
           .where(eq(postCategories.categoryId, cat.id)),
       ),
-      excludeId ? sql`${posts.id} != ${excludeId}` : undefined,
+      idExclusion,
+      featuredExclusion,
     );
 
     const [rows, countRows] = await Promise.all([
@@ -93,7 +105,8 @@ export async function fetchPostPage({
           .from(postTags)
           .where(eq(postTags.tagId, tag.id)),
       ),
-      excludeId ? sql`${posts.id} != ${excludeId}` : undefined,
+      idExclusion,
+      featuredExclusion,
     );
 
     const [rows, countRows] = await Promise.all([
@@ -107,7 +120,8 @@ export async function fetchPostPage({
   // ── Unfiltered (homepage) ──────────────────────────────────────────────────
   const where = and(
     baseWhere,
-    excludeId ? sql`${posts.id} != ${excludeId}` : undefined,
+    idExclusion,
+    featuredExclusion,
   );
 
   const [rows, countRows] = await Promise.all([
