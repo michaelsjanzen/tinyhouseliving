@@ -91,9 +91,19 @@ Replit's **Import from GitHub** button tries to auto-classify the imported repo 
 
 **Use this flow instead:**
 
-1. Create a **new blank Replit project** (Node.js template).
-2. In the Replit chat, send this prompt to the agent:
-   > Install Pugmill CMS from https://github.com/pugmillcms/pugmill and carefully follow the instructions you find in the project. Be sure to ask me for the four secrets (NEXTAUTH_URL, NEXTAUTH_SECRET, PRODUCTION_URL, AI_ENCRYPTION_KEY) and help me set them up.
+Create a **new blank Replit project** (Node.js template).
+
+In the Replit chat, send this prompt to the agent:
+```
+1. Install Pugmill CMS from https://github.com/pugmillcms/pugmill
+2. Carefully follow the instructions you find in the project.
+3. Be sure to ask me for the four secrets:
+a. NEXTAUTH_URL
+b. NEXTAUTH_SECRET
+c. PRODUCTION_URL
+d. I_ENCRYPTION_KEY)
+4. Help and remind me to set them up.
+```
 
 ### 1. Clone and install
 
