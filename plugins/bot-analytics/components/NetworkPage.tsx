@@ -106,16 +106,17 @@ export default async function NetworkPage({
           </p>
         </div>
 
-        {!network.networkToken && (
-          <div className="bg-zinc-50 border border-zinc-200 rounded-lg px-4 py-3 space-y-1">
-            <p className="text-xs font-medium text-zinc-600">No token yet?</p>
-            <p className="text-xs text-zinc-400">
-              Click below to register this site with aeopugmill.com. A token will be generated
-              and filled into the field above — review it, then hit Save.
-            </p>
-            <RegisterButton />
-          </div>
-        )}
+        <div className="bg-zinc-50 border border-zinc-200 rounded-lg px-4 py-3 space-y-1">
+          <p className="text-xs font-medium text-zinc-600">
+            {network.networkToken ? "Need to refresh your token?" : "No token yet?"}
+          </p>
+          <p className="text-xs text-zinc-400">
+            {network.networkToken
+              ? "Click below to re-register this site. A new token will be issued by aeopugmill.com and auto-filled into the field above. Use this if recent submissions show HTTP 401 — that means the locally-saved token has drifted from what aeopugmill has stored. After re-registering, click Save Network Settings."
+              : "Click below to register this site with aeopugmill.com. A token will be generated and filled into the field above — review it, then hit Save."}
+          </p>
+          <RegisterButton />
+        </div>
 
         <button
           type="submit"

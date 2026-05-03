@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Plugin Settings" };
+export const metadata: Metadata = { title: "Plugins" };
 
 import { notFound } from "next/navigation";
 import { getPlugin, getAllPlugins } from "@/lib/plugin-registry";

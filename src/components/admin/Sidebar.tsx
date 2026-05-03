@@ -17,7 +17,7 @@ const topNavItems = [
   { label: "Notifications", path: "/admin/notifications" },
   { label: "Content", path: "/admin/posts" },
   { label: "Design", path: "/admin/design" },
-  { label: "Plugin Settings", path: "/admin/plugins" },
+  { label: "Plugins", path: "/admin/plugins" },
   { label: "Settings", path: "/admin/settings" },
 ];
 

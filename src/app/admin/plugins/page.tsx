@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Plugin Settings" };
+export const metadata: Metadata = { title: "Plugins" };
 
 import { getConfig } from "@/lib/config";
 import { getAllPlugins } from "@/lib/plugin-registry";
@@ -16,7 +16,7 @@ export default async function PluginsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Plugin Settings</h2>
+        <h2 className="text-2xl font-bold">Plugins</h2>
         <p className="text-sm text-zinc-500 mt-1">
           Toggle plugins on or off and configure their settings. To fully remove a plugin, purge its data here then delete the plugin directory and its import from plugin-registry.ts.
         </p>
