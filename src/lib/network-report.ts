@@ -29,7 +29,12 @@ import { parseAeoMetadata } from "@/lib/aeo";
 
 const PLUGIN_VERSION = "pugmill-cms/1.0";
 const SCHEMA_VER     = 2;
-const INGEST_URL     = "https://aeopugmill.com/api/ingest";
+// Use the www subdomain explicitly. The bare aeopugmill.com issues a
+// 308 redirect to www, and fetch() strips the Authorization header on
+// cross-origin redirects (different origins by spec) — which silently
+// turns every submission into a 401. Hitting www directly avoids the
+// redirect and preserves the HMAC bearer token.
+const INGEST_URL     = "https://www.aeopugmill.com/api/ingest";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
