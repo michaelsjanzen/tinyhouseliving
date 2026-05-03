@@ -14,7 +14,7 @@
 
 ### Step 1 — Collect all required secrets upfront
 
-Ask the user for these three values before running `npm install` or starting the app. Do not proceed until all three are saved as Replit Secrets:
+Ask the user for these three values before running `npm install` or starting the app. Provide generated values for convenience. Do not proceed until all three are saved as Replit Secrets:
 
 | Secret | How to get it |
 |---|---|
