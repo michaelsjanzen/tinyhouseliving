@@ -57,6 +57,29 @@ If the user doesn't have a production URL yet, save the other two and continue �
 
 These mistakes account for the majority of failed Replit setups. Check for them before proceeding.
 
+### Step 3 — Configure the workflow and deployment
+
+Replit's blank project starts with a minimal `.replit` that does not include the
+workflow or deployment settings from the cloned repo. The agent cannot copy `.replit`
+directly — Replit blocks direct edits to that file. Configure both using Replit's tools
+immediately after `npm install` completes:
+
+```javascript
+// Dev workflow (preview pane)
+await configureWorkflow({
+    name: "Start application",
+    command: "npm run dev",
+    waitForPort: 5000,
+    outputType: "webview"
+});
+
+// Production deployment
+await deployConfig({
+    deploymentTarget: "autoscale",
+    build: ["npm", "run", "build"],
+    run:   ["npm", "run", "start"]
+});
+```
 ---
 
 ## Philosophy Summary (read the full document)
