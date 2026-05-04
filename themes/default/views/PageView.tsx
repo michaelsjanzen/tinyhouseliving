@@ -167,7 +167,7 @@ export default function PageView({
       {articleHeaderContent}
 
       {/* Page body */}
-      <div className="prose max-w-none prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-[var(--color-foreground)] prose-a:text-[var(--color-link)] prose-a:no-underline hover:prose-a:underline prose-code:text-[var(--color-foreground)] prose-code:bg-[var(--color-surface)] prose-code:px-1 prose-code:rounded prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-p:text-[var(--color-foreground)] prose-li:text-[var(--color-foreground)]">
+      <div className="prose max-w-none prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-[var(--color-foreground)] prose-a:text-[var(--color-link)] prose-a:no-underline hover:prose-a:underline prose-code:text-[var(--color-foreground)] prose-code:bg-[var(--color-surface)] prose-code:px-1 prose-code:rounded prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-pre:whitespace-pre-wrap prose-pre:break-words prose-p:text-[var(--color-foreground)] prose-li:text-[var(--color-foreground)]">
         <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeSlug]}>
           {stripLeadingTitleHeading(content, title)}
         </ReactMarkdown>
