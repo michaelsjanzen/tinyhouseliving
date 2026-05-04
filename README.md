@@ -97,11 +97,12 @@ In the Replit chat, send this prompt to the agent:
 ```
 1. Install Pugmill CMS from https://github.com/pugmillcms/pugmill
 2. Carefully follow the instructions you find in the project.
-3. Be sure to ask me for the four secrets:
+3. Be sure to ask me for the five secrets:
 a. NEXTAUTH_URL
 b. NEXTAUTH_SECRET
 c. PRODUCTION_URL
-d. I_ENCRYPTION_KEY)
+d. AI_ENCRYPTION_KEY
+e. CRON_SECRET
 4. Help and remind me to set them up.
 ```
 

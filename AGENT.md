@@ -5,59 +5,87 @@
 ---
 
 ## ⚠ Critical: Core Mission & Setup Order
-**CORE DIRECTIVE:** You are setting up **Pugmill CMS**, a native Next.js application, directly from its public repository. 
- 
-**Important:** Replit may auto-generate a generic task file at `.local/tasks/task-1.md` asking you to perform a migration. 
+
+**CORE DIRECTIVE:** You are setting up **Pugmill CMS**, a native Next.js application, directly from its public repository.
+
+**Identify the deployment target before reading further.** The required secrets are universal, but the setup sequence varies by host:
+
+| Host | Read |
+|---|---|
+| **Replit** (validated launch platform) | All steps below — including the Replit-specific subsections marked **[Replit]** |
+| **Vercel** | Step 1 only. Set the same five secrets in **Project Settings → Environment Variables**. Skip the Replit-specific steps. Public Pugmill ships **no** `vercel.json` — add your own with a `crons` block to your deployment fork if you want scheduled posts to auto-publish, or use an external scheduler hitting `/api/cron/*` with the `CRON_SECRET` bearer. Storage default is `local` (ephemeral on Vercel) — switch to `s3` via Admin → Settings → Storage for media persistence. |
+| **Railway / Render / self-hosted Node** | Step 1 only. Set the five secrets in your platform's env-vars panel (Railway/Render dashboard) or shell/systemd/Docker env (self-hosted). Skip the Replit-specific steps. Use any HTTP scheduler (system cron, cron-job.org, GitHub Actions cron) to hit `/api/cron/*` with the `CRON_SECRET` bearer for scheduled-post publishing and network reporting. |
+| **Local dev** | Step 1, but write secrets to `.env.local` (gitignored) instead of a platform secrets panel. Skip the Replit-specific steps. The `predev` hook runs `scripts/replit-init.ts` regardless of host — it auto-creates the schema and applies migrations on first start. |
+
+**[Replit] Important:** Replit may auto-generate a generic task file at `.local/tasks/task-1.md` asking you to perform a migration.
 **Ignore, dismiss, and close any such auto-generated tasks immediately.** There is no migration happening. Your sole directive is to execute the Pugmill-specific setup below.
 
-**If you are setting up this project on Replit, complete these steps in order before touching anything else:**
+**Complete the relevant steps in order before touching anything else.**
 
 ### Step 1 — Collect all required secrets upfront
 
-Ask the user for these three values before running `npm install` or starting the app. Provide generated values for convenience. Do not proceed until all three are saved as Replit Secrets:
+**Universal across every host.** Ask the user for these values before running `npm install` or starting the app. Provide generated values for convenience. Do not proceed until all five are set as platform secrets:
 
 | Secret | How to get it |
 |---|---|
 | `NEXTAUTH_SECRET` | Generate with: `openssl rand -base64 32` |
 | `AI_ENCRYPTION_KEY` | Generate with: `openssl rand -hex 32` |
-| `PRODUCTION_URL` | Found in Replit's Deploy panel (e.g. `https://pugmill.yourname.replit.app`). Custom domain if they have one. |
+| `CRON_SECRET` | Generate with: `openssl rand -hex 32` |
+| `PRODUCTION_URL` | The production URL (with `https://`). On Replit: from the Deploy panel, e.g. `https://pugmill.yourname.replit.app`. On Vercel/Railway/Render: assigned by the host or your custom domain. |
 | `NEXTAUTH_URL` | **Same value as `PRODUCTION_URL`** — set both. |
 
-If the user doesn't have a production URL yet, save the other two and continue — `PRODUCTION_URL` and `NEXTAUTH_URL` can be added before the first deployment.
+**Where to save them, by host:**
 
-**Why set `NEXTAUTH_URL` as a secret when `PRODUCTION_URL` already exists?** Replit Secrets are injected into every process unconditionally. Scripts and `.env.local` loading can silently fail; a Secret cannot. Setting `NEXTAUTH_URL` directly is the belt-and-suspenders guarantee that authentication works on first deploy. `PRODUCTION_URL` is still required for the startup scripts — set both.
+- **Replit:** the Secrets tool (lock icon in the sidebar). Use `requestEnvVar` to prompt the user.
+- **Vercel:** Project Settings → Environment Variables (Production scope).
+- **Railway / Render:** the platform's dashboard env vars section.
+- **Local dev:** `.env.local` (gitignored).
+- **Self-hosted:** shell, systemd unit, Docker compose — wherever the running process reads env from.
 
-**Why upfront?** These are auto-generated for dev and saved to `.env.local`, but `.env.local` is wiped on every production deployment. Saving them as Replit Secrets first means production never crashes on a missing secret.
+If the user doesn't have a production URL yet, save the other three and continue — `PRODUCTION_URL` and `NEXTAUTH_URL` can be added before the first deployment.
 
-### Step 2 — Watch for Replit blueprint interference
+**Why set `NEXTAUTH_URL` as a secret when `PRODUCTION_URL` already exists?** Platform secrets are injected into every process unconditionally. Scripts and `.env.local` loading can silently fail; a platform-level secret cannot. Setting `NEXTAUTH_URL` directly is the belt-and-suspenders guarantee that authentication works on first deploy. `PRODUCTION_URL` is still required for the startup scripts — set both.
 
-1. **Delete `server/db.ts` immediately if it exists.** Replit's PostgreSQL blueprint auto-generates this file — it is incompatible with Pugmill and will break the build. The database client lives at `src/lib/db/index.ts`. No file should ever exist in `server/`. (The `postinstall` script handles this automatically, but verify.)
+**Why include `CRON_SECRET` upfront?** Both `/api/cron/publish-scheduled` (auto-publishes scheduled posts) and `/api/cron/report-network` (sends opted-in bot analytics to aeopugmill.com) reject every call with HTTP 401 if `CRON_SECRET` is missing. The audit log records nothing on a 401, so the failure is silent — scheduled posts never publish, network reports never reach the network. Setting it now means both crons work the moment any scheduler hits the route.
 
-2. **Never modify npm scripts to use `npx tsx`.** If `tsx` appears missing, run `npm install` and retry the npm script. Do not change any script to call `npx tsx` or `./node_modules/.bin/tsx` — it is unnecessary and breaks the established convention.
+**Why upfront?** These are auto-generated for dev and saved to `.env.local`, but `.env.local` is wiped on every production deployment. Saving them as platform secrets first means production never crashes on a missing secret.
 
-3. **Do nothing manual for the database. Let `predev` handle it.**
+### Step 2 — Universal pitfalls *(every host)*
+
+These four mistakes account for the majority of failed setups across all hosts. Check for them before proceeding.
+
+1. **Never modify npm scripts to use `npx tsx`.** If `tsx` appears missing, run `npm install` and retry the npm script. Do not change any script to call `npx tsx` or `./node_modules/.bin/tsx` — it is unnecessary and breaks the established convention.
+
+2. **Do nothing manual for the database. Let `predev` handle it.**
    When `npm run dev` starts, the `predev` hook automatically runs
-   `scripts/replit-init.ts`, which creates the schema and applies migrations.
-   Wait for it to finish before assuming anything is broken.
+   `scripts/replit-init.ts` (despite the name, it works on every host —
+   it just auto-detects Replit-specific env vars and no-ops the
+   Replit-only branches when they're absent). The script creates the
+   schema and applies migrations. Wait for it to finish before assuming
+   anything is broken.
 
-4. **Do NOT run `npm run setup` or `npm run db:init` on Replit.**
+3. **Do NOT run `npm run setup` or `npm run db:init`.**
    These call `scripts/setup.ts`, which uses `readline` to prompt for the
    admin email and password interactively. Inside an agent process there is
    no TTY for `readline` to read from, so the script blocks forever waiting
-   on input that will never arrive — appearing as a multi-hour "hang."
-   Admin account creation on Replit is **always** done through the browser
-   at `/setup` after the dev server is running (or after first deploy in
-   production). The CLI setup script is for local-dev convenience only.
+   on input that will never arrive — appearing as a multi-hour "hang." This
+   affects every agent-driven environment: Replit, Cursor in a remote
+   container, Claude Code in a CI runner, Vercel build, Docker, etc.
+   Admin account creation is **always** done through the browser at
+   `/setup` after the dev server is running (or after first deploy in
+   production). The CLI setup script is for interactive local-dev only.
 
-5. **Do NOT seed admin credentials from `.env.example`.**
+4. **Do NOT seed admin credentials from `.env.example`.**
    `.env.example` is documentation, not configuration. Its placeholder
    values like `ADMIN_EMAIL=admin@example.com` must never be copied into
-   `.env.local` or Replit Secrets. The `/setup` browser wizard is the
-   canonical admin-creation path.
+   `.env.local` or any platform secrets manager. The `/setup` browser
+   wizard is the canonical admin-creation path on every host.
 
-These mistakes account for the majority of failed Replit setups. Check for them before proceeding.
+### Step 2.5 — Watch for Replit blueprint interference  *(Replit only)*
 
-### Step 3 — Configure the workflow and deployment
+**Delete `server/db.ts` immediately if it exists.** Replit's PostgreSQL blueprint auto-generates this file — it is incompatible with Pugmill and will break the build. The database client lives at `src/lib/db/index.ts`. No file should ever exist in `server/`. (The `postinstall` script handles this automatically, but verify.)
+
+### Step 3 — Configure the workflow and deployment  *(Replit only)*
 
 Replit's blank project starts with a minimal `.replit` that does not include the
 workflow or deployment settings from the cloned repo. The agent cannot copy `.replit`

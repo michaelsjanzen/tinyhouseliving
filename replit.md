@@ -12,18 +12,36 @@ telling the user setup is done.** Specifically:
    generate one with `openssl rand -base64 32`.
    Do NOT mention the value in chat — use the secrets tool so the user sees a
    confirmation dialog they must interact with.
-2. Immediately after, call `requestEnvVar` with `requestType: "secret"` and
+2. Call `requestEnvVar` with `requestType: "secret"` and
+   `keys: ["AI_ENCRYPTION_KEY"]`. Generate with `openssl rand -hex 32`. This
+   key encrypts the AI provider API key and the AEO network token at rest in
+   the database. Without it, both are stored as plaintext (the app warns but
+   continues to work). Setting it now means rotating the key later doesn't
+   silently break decryption of previously-saved values.
+3. Call `requestEnvVar` with `requestType: "secret"` and
+   `keys: ["CRON_SECRET"]`. Generate with `openssl rand -hex 32`. This is
+   the bearer token both `/api/cron/publish-scheduled` and
+   `/api/cron/report-network` check before doing any work — without it,
+   every cron call returns 401 silently and scheduled posts never publish,
+   network reports never reach aeopugmill.com.
+4. Immediately after, call `requestEnvVar` with `requestType: "secret"` and
    `keys: ["PRODUCTION_URL"]`. Do this **even if PRODUCTION_URL is already set** —
    it may have carried over from a previous project and the user must confirm the
    value is correct for this deployment. The production URL is found in Replit's
    deployment panel (e.g. `https://yourapp.replit.app`).
    Do NOT skip. Do NOT mention it in chat. Use the secrets tool.
-3. Only after both secrets are saved via `requestEnvVar`, tell the user:
+5. Call `requestEnvVar` with `requestType: "secret"` and
+   `keys: ["NEXTAUTH_URL"]`. Use the **same value** the user just gave for
+   `PRODUCTION_URL`. Replit Secrets are injected into every process
+   unconditionally, while `.env.local` writes can fail silently — setting
+   `NEXTAUTH_URL` directly is the belt-and-suspenders guarantee that
+   authentication works on first deploy.
+6. Only after all five secrets are saved via `requestEnvVar`, tell the user:
    - Click **Deploy** first (dev and production use separate databases)
    - After deploying, visit **/setup** on their **production URL** to create the admin account
    - Do NOT tell them to visit /setup on the dev URL — that account will not exist in production
 
-Do not skip step 2. Even if PRODUCTION_URL appears to be set, always confirm it —
+Do not skip step 4. Even if PRODUCTION_URL appears to be set, always confirm it —
 a stale value from a previous project will break authentication silently in production.
 
 A self-hosted, Next.js-based CMS with admin panel, plugin system, and theme support.
