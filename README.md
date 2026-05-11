@@ -1,6 +1,6 @@
 # Pugmill CMS
 
-**Want to skip ahead?** Jump to the **Quick Start** section below for the install prompt.
+**Want to skip ahead?** Scroll to the **Quick Start** section below for the install prompt.
 
 Pugmill CMS is a full-stack, rebuildable content management system for developers working with AI agents. It owns its own frontend -- a modern React/Next.js presentation layer that ships as part of the CMS, not as an afterthought. It includes an admin dashboard, a Markdown-first editor with Visual/Raw toggle, hierarchical content types, a public REST API for external consumption, and per-post AI Engine Optimization (AEO) metadata served via `llms.txt` endpoints.
 
@@ -112,7 +112,7 @@ In the Replit chat, send this prompt to the agent:
 ```
 1. Install Pugmill CMS from https://github.com/pugmillcms/pugmill
 2. Carefully follow the instructions you find in the project.
-3. Be sure to ask me for the five secrets:
+3. Be sure to ask me for the five secrets and provide pre-generated values for me to use:
 a. NEXTAUTH_URL
 b. NEXTAUTH_SECRET
 c. PRODUCTION_URL
