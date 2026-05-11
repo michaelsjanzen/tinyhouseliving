@@ -95,6 +95,19 @@ Replit's **Import from GitHub** button tries to auto-classify the imported repo 
 
 Create a **new blank Replit project** (Node.js template).
 
+> **Generating your own secret values (if the agent doesn't):**
+> A well-behaved agent will offer to generate `NEXTAUTH_SECRET`, `AI_ENCRYPTION_KEY`, and `CRON_SECRET` for you. If yours doesn't, generate them from any terminal — macOS, Linux, WSL, or Windows PowerShell — using Node, which you already have installed:
+>
+> ```bash
+> # NEXTAUTH_SECRET — base64
+> node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+>
+> # AI_ENCRYPTION_KEY and CRON_SECRET — hex (64 chars, exact length required)
+> node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+> ```
+>
+> macOS and Linux can also use `openssl rand -base64 32` and `openssl rand -hex 32` — same output. Whichever you pick, paste the value into the Replit Secrets tool (lock icon) under the matching key name. Never paste a secret into the chat.
+
 In the Replit chat, send this prompt to the agent:
 ```
 1. Install Pugmill CMS from https://github.com/pugmillcms/pugmill
