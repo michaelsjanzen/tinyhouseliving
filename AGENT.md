@@ -174,6 +174,8 @@ Plugins are statically registered in `src/lib/plugin-registry.ts` in the `ALL_PL
 
 Each theme defines its editable surface in `themes/<id>/design.ts` via `DESIGN_TOKEN_DEFS`. The admin Design page renders controls for all `editable: true` tokens. Changes are saved as a draft to `theme_design_configs` (status: `'draft'`) and go live only when published (status: `'published'`). `buildCssString()` injects token values as CSS custom properties into `:root {}` in the theme's `Layout.tsx`. Reading `THEMES.md` in full before creating or modifying a theme is required.
 
+When building or changing **admin UI** (not themes), follow `UX_PATTERNS.md` — it defines which feedback surface to use (toast vs. modal vs. banner vs. notification), the destructive-action confirmation contract, content/voice rules, and the accessibility baseline. `DESIGN_INFLUENCES.md` records the design systems behind the tokens and admin UX.
+
 #### 5. Server Actions and Plugin Initialization
 
 Next.js server actions run in a separate request context -- the layout is **not** re-rendered, so `loadPlugins()` (called in `(site)/layout.tsx` and `admin/layout.tsx`) may not have run yet on a cold start.

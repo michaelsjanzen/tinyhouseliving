@@ -287,6 +287,8 @@ pugmill/
 ├── pugmill.config.json           # Seed config: active theme, enabled plugins
 ├── AGENT.md                      # AI agent instructions (read this first)
 ├── PHILOSOPHY.md                 # Design principles for the human-AI team
+├── DESIGN_INFLUENCES.md          # Design systems behind the themes & admin UX
+├── UX_PATTERNS.md                # Admin interaction & content patterns
 ├── CHANGELOG.md                  # Version history
 ├── REQUIREMENTS.md               # Full product requirements
 └── SECURITY.md                   # Security policy
