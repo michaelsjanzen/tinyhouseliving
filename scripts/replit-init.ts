@@ -329,48 +329,32 @@ async function main() {
   dotenvConfig({ path: ENV_LOCAL, override: false });
 
   // ── Step 3: Database schema ─────────────────────────────────────────────────
-  if (isProd) {
-    // In production, use DB state to decide whether to run migrations.
-    // Fresh install (no admin yet): run full setup.
-    // Existing install: run createSchema only (IF NOT EXISTS — safe), skip migrations.
-    console.log("Database schema");
-    const { createSchema } = await import("./create-schema");
-    await createSchema();
+  // Always run createSchema + migrations, in both dev and prod. Migrations are
+  // tracked in the schema_migrations table and each runs exactly once, so on an
+  // existing install this is a no-op for already-applied migrations and only
+  // applies genuinely pending ones. This is what keeps a "rebuildable" install
+  // correct after a template/code update that adds a new table or column —
+  // without it, updated installs silently miss new schema and crash at runtime
+  // on the affected page (e.g. a missing aeo_network_submissions table).
+  console.log("Database schema");
+  const { createSchema } = await import("./create-schema");
+  await createSchema();
 
-    const existingInstall = await checkExistingInstall();
-    if (!existingInstall) {
-      console.log("Fresh install detected — running migrations...");
-      const { execSync } = await import("child_process");
-      try {
-        execSync("tsx scripts/run-migrations.ts", {
-          stdio: "inherit",
-          env: { ...process.env },
-        });
-      } catch {
-        console.warn("  Warning: one or more migrations reported an error (see above). Continuing...");
-      }
-    } else {
-      console.log(
-        "  Existing install detected — skipping automatic migrations.\n" +
-        "  To apply pending schema changes, run: npm run db:migrate\n"
-      );
-    }
-  } else {
-    // Dev: always run createSchema + migrations (idempotent)
-    console.log("Database schema");
-    const { createSchema } = await import("./create-schema");
-    await createSchema();
-
-    console.log("Running migrations...");
-    const { execSync } = await import("child_process");
-    try {
-      execSync("tsx scripts/run-migrations.ts", {
-        stdio: "inherit",
-        env: { ...process.env },
-      });
-    } catch {
-      console.warn("  Warning: one or more migrations reported an error (see above). Continuing...");
-    }
+  // Log fresh-vs-existing for operator clarity, but migrate either way.
+  const existingInstall = await checkExistingInstall();
+  console.log(
+    existingInstall
+      ? "Existing install — applying any pending migrations..."
+      : "Fresh install — running migrations..."
+  );
+  const { execSync } = await import("child_process");
+  try {
+    execSync("tsx scripts/run-migrations.ts", {
+      stdio: "inherit",
+      env: { ...process.env },
+    });
+  } catch {
+    console.warn("  Warning: one or more migrations reported an error (see above). Continuing...");
   }
 
   // ── Step 3.5 (dev only): Bridge OAuth credentials from DB → .env.local ──────

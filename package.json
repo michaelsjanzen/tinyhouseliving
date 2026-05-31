@@ -36,7 +36,7 @@
     "setup": "tsx scripts/setup.ts",
     "db:push": "drizzle-kit push --force",
     "db:create": "tsx scripts/create-schema.ts",
-    "db:init": "npm run db:create && npm run setup",
+    "db:init": "npm run db:create && npm run db:migrate && npm run setup",
     "db:migrate": "tsx --env-file=.env.local scripts/run-migrations.ts",
     "db:studio": "drizzle-kit studio",
     "env:check": "tsx scripts/env-check.ts",
