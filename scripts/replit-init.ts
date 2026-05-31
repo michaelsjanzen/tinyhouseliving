@@ -141,7 +141,7 @@ async function main() {
     process.exit(1);
   }
 
-  // ── Step 2: NEXTAUTH_SECRET and AI_ENCRYPTION_KEY ───────────────────────────
+  // ── Step 2: NEXTAUTH_SECRET, AI_ENCRYPTION_KEY, CRON_SECRET ─────────────────
   const envMap = readEnvLocal();
   const configured: string[] = [];
 
@@ -170,6 +170,18 @@ async function main() {
     envMap.set("AI_ENCRYPTION_KEY", key);
     process.env.AI_ENCRYPTION_KEY = key;
     configured.push("AI_ENCRYPTION_KEY");
+  }
+  // CRON_SECRET secures the scheduled-publish and network-report cron endpoints.
+  // Those routes fail closed (HTTP 401) when it is unset, so generating it here
+  // makes scheduled publishing work out of the box instead of silently never
+  // running. The value is written to .env.local; read it from there (or pin it
+  // as a Replit Secret) when configuring an external scheduler to call the
+  // /api/cron/* endpoints with `Authorization: Bearer <CRON_SECRET>`.
+  if (!getVar("CRON_SECRET", envMap)) {
+    const key = crypto.randomBytes(32).toString("hex");
+    envMap.set("CRON_SECRET", key);
+    process.env.CRON_SECRET = key;
+    configured.push("CRON_SECRET");
   }
 
   if (isProd && configured.includes("NEXTAUTH_SECRET")) {

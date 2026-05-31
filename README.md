@@ -87,38 +87,30 @@ Community recipes are listed at the [Pugmill community directory](https://github
 - PostgreSQL 16 database
 - (Optional) AWS S3-compatible bucket for media storage
 
-### Recommended install on Replit (do not use "Import from GitHub")
+### Recommended install on Replit (Import from GitHub)
 
-Replit's **Import from GitHub** button tries to auto-classify the imported repo as a Replit "artifact" (slides, mockup, etc.) and overwrites the `.replit` file in the process. This breaks Pugmill's deploy configuration and confuses the agent in the new workspace.
+The fastest way in: in Replit choose **Create App → Import from GitHub** and point it at `https://github.com/pugmillcms/pugmill`. Replit provisions Node.js and PostgreSQL from the repo's `.replit` config, and the first boot runs `replit-init` automatically — generating secrets, creating the database schema, applying migrations, and pointing you to `/setup` to create your admin account.
 
-**Use this flow instead:**
-
-Create a **new blank Replit project** (Node.js template).
-
-> **Generating your own secret values (if the agent doesn't):**
-> A well-behaved agent will offer to generate `NEXTAUTH_SECRET`, `AI_ENCRYPTION_KEY`, and `CRON_SECRET` for you. If yours doesn't, generate them from any terminal — macOS, Linux, WSL, or Windows PowerShell — using Node, which you already have installed:
+> **If your Run button or deployment looks wrong right after import:**
+> Replit occasionally reclassifies an imported repo as an "artifact" (slides, mockup, etc.) and overwrites the `.replit` file, wiping the run/deploy config and the PostgreSQL module. If that happens, restore it from the Replit **Shell**:
 >
 > ```bash
-> # NEXTAUTH_SECRET — base64
-> node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
->
-> # AI_ENCRYPTION_KEY and CRON_SECRET — hex (64 chars, exact length required)
-> node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+> npm run replit:restore
 > ```
 >
-> macOS and Linux can also use `openssl rand -base64 32` and `openssl rand -hex 32` — same output. Whichever you pick, paste the value into the Replit Secrets tool (lock icon) under the matching key name. Never paste a secret into the chat.
+> (or use the **"Restore Replit config"** action in the Tools panel), then reload the workspace. The canonical config lives at `scripts/replit.template`.
 
-In the Replit chat, send this prompt to the agent:
+**Secrets are handled for you.** On first run `replit-init` auto-generates `NEXTAUTH_SECRET`, `AI_ENCRYPTION_KEY`, and `CRON_SECRET`, and auto-detects `NEXTAUTH_URL` from your Replit domain — you don't need to provide any of them. Two optional follow-ups the first-run banner reminds you about:
+
+- **Pin `NEXTAUTH_SECRET`** as a Replit Secret before your first *production* deploy, so logins survive redeploys (otherwise each redeploy regenerates it and signs everyone out).
+- **Set `PRODUCTION_URL`** as a Replit Secret only if you use a **custom domain** — otherwise the deployment domain is auto-detected.
+
+Prefer to drive it from the Replit agent chat? Paste this prompt:
 ```
-1. Install Pugmill CMS from https://github.com/pugmillcms/pugmill
-2. Carefully follow the instructions you find in the project.
-3. Be sure to ask me for the five secrets and provide pre-generated values for me to use:
-a. NEXTAUTH_URL
-b. NEXTAUTH_SECRET
-c. PRODUCTION_URL
-d. AI_ENCRYPTION_KEY
-e. CRON_SECRET
-4. Help and remind me to set them up.
+1. Install Pugmill CMS from https://github.com/pugmillcms/pugmill using Import from GitHub.
+2. Carefully follow the instructions in the project's AGENT.md and README.
+3. If the Run button or deploy config looks wrong after import, run: npm run replit:restore — then reload.
+4. Secrets auto-generate on first run. Only ask me for PRODUCTION_URL if I'm using a custom domain, and remind me to pin NEXTAUTH_SECRET before the production deploy.
 ```
 
 ### 1. Clone and install
