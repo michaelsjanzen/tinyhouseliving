@@ -40,7 +40,11 @@ export type FormTokenFailure =
   | "too_fast"
   | "expired";
 
-export type FormTokenResult = { ok: true } | { ok: false; reason: FormTokenFailure };
+export interface FormTokenResult {
+  ok: boolean;
+  /** Present only when ok is false. */
+  reason?: FormTokenFailure;
+}
 
 function signingKey(): string | null {
   return process.env.NEXTAUTH_SECRET || null;
