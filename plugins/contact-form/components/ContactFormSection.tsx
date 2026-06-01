@@ -1,5 +1,6 @@
 import { getConfig } from "../../../src/lib/config";
 import type { PostFooterSlotProps } from "../../../src/lib/plugin-registry";
+import { issueFormToken } from "../../../src/lib/form-protection";
 import ContactFormUI from "./ContactFormUI";
 
 /**
@@ -33,6 +34,7 @@ export default async function ContactFormSection({ postSlug }: PostFooterSlotPro
         requirePhone={requirePhone}
         showSocialUrl={showSocialUrl}
         requireSocialUrl={requireSocialUrl}
+        token={issueFormToken("contact-form")}
       />
     </section>
   );

@@ -13,6 +13,7 @@ import { getCurrentUser } from "../../src/lib/get-current-user";
 import { createNotification, deleteNotificationByReplaceKey } from "../../src/lib/notifications";
 import { getUnreadCount } from "./db";
 import { submissionLimiter, SUBMISSION_RATE_LIMIT } from "../../src/lib/rate-limit";
+import { verifyFormToken } from "../../src/lib/form-protection";
 import { auditLog } from "../../src/lib/audit-log";
 
 async function requireAdmin() {
@@ -63,6 +64,22 @@ export async function submitContactForm(
   // they don't know they were filtered.
   const hp = (formData.get("_hp") as string) ?? "";
   if (hp.length > 0) {
+    return { status: "success", message: successMessage };
+  }
+
+  // Signed token (proof the form was rendered) + timing trap. Issued by
+  // ContactFormSection via issueFormToken("contact-form").
+  const tokenCheck = verifyFormToken(formData.get("_t") as string, "contact-form");
+  if (!tokenCheck.ok) {
+    if (tokenCheck.reason === "expired") {
+      // Likely a real visitor who left the tab open — tell them how to recover.
+      return {
+        status: "error",
+        message: "This form expired. Please refresh the page and send your message again.",
+      };
+    }
+    // missing / malformed / bad_signature / wrong_form / too_fast ⇒ almost
+    // certainly a bot. Mirror the honeypot: report success so it learns nothing.
     return { status: "success", message: successMessage };
   }
 
