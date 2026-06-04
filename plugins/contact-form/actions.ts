@@ -71,16 +71,30 @@ export async function submitContactForm(
   // ContactFormSection via issueFormToken("contact-form").
   const tokenCheck = verifyFormToken(formData.get("_t") as string, "contact-form");
   if (!tokenCheck.ok) {
-    if (tokenCheck.reason === "expired") {
+    const reason = tokenCheck.reason;
+    // Always log so a misfire is never invisible (this gate sits before save+email).
+    console.warn(`[contact-form] form-protection token check failed: ${reason}`);
+
+    if (reason === "expired") {
       // Likely a real visitor who left the tab open — tell them how to recover.
       return {
         status: "error",
         message: "This form expired. Please refresh the page and send your message again.",
       };
     }
-    // missing / malformed / bad_signature / wrong_form / too_fast ⇒ almost
-    // certainly a bot. Mirror the honeypot: report success so it learns nothing.
-    return { status: "success", message: successMessage };
+
+    // Only silently drop the UNAMBIGUOUS bot signals. A real browser on this
+    // force-dynamic page always receives a valid token, so a missing/forged/
+    // wrong-form token means a direct POST that never loaded the form.
+    if (reason === "missing" || reason === "malformed" || reason === "bad_signature" || reason === "wrong_form") {
+      // Mirror the honeypot: report success so the bot learns nothing.
+      return { status: "success", message: successMessage };
+    }
+
+    // reason === "too_fast": a genuinely quick human can trip the 3s timing
+    // floor. Silently losing a real contact message is worse than letting a fast
+    // submitter through (the honeypot and per-IP rate limiter still apply), so
+    // fall through and process the submission normally.
   }
 
   const name = (formData.get("name") as string)?.trim() ?? "";
