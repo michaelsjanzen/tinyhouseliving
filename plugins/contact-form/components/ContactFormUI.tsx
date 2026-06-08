@@ -1,8 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import Script from "next/script";
 import { submitContactForm, type ContactFormState } from "../actions";
+import TurnstileWidget from "./TurnstileWidget";
 
 interface Props {
   showPhone: boolean;
@@ -125,25 +125,10 @@ export default function ContactFormUI({ showPhone, requirePhone, showSocialUrl, 
         />
       </div>
 
-      {/* Cloudflare Turnstile — invisible bot challenge. Only when configured.
-          The script auto-renders the widget and injects a hidden
+      {/* Cloudflare Turnstile — invisible bot challenge, only when configured.
+          Renders explicitly and submits the token via a React-controlled
           `cf-turnstile-response` field that the server action verifies. */}
-      {turnstileSiteKey && (
-        <>
-          <Script
-            src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-            strategy="afterInteractive"
-            async
-            defer
-          />
-          <div
-            className="cf-turnstile"
-            data-sitekey={turnstileSiteKey}
-            data-theme="auto"
-            data-refresh-expired="auto"
-          />
-        </>
-      )}
+      {turnstileSiteKey && <TurnstileWidget siteKey={turnstileSiteKey} />}
 
       {state.status === "error" && (
         <p className="text-sm" style={{ color: "#dc2626" }}>
