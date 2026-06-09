@@ -68,8 +68,9 @@ import {
 // ─── Database ─────────────────────────────────────────────────────────────────
 
 // Supabase (and most managed Postgres) require SSL. pg treats sslmode=require as
-// verify-full, which rejects Supabase's self-signed cert, so we strip sslmode and
-// pass our own ssl option (mirrors src/lib/db/index.ts). Local Postgres gets no SSL.
+// verify-full, which rejects Supabase's self-signed cert chain, so strip sslmode
+// from the URL and pass our own ssl option (mirrors Pugmill's src/lib/db/index.ts).
+// Local Postgres gets no SSL.
 const rawConn = process.env.DATABASE_URL ?? "";
 const isLocalDb = rawConn.includes("localhost") || rawConn.includes("127.0.0.1");
 const pool = new Pool({
@@ -120,10 +121,17 @@ async function uniqueSlug(base: string, existingSlugs: Set<string>): Promise<str
 // ─── WXR types ────────────────────────────────────────────────────────────────
 
 interface WxrCategory {
-  "wp:cat_id": number;
+  // WXR 1.2 identifies categories by wp:term_id; very old exports used wp:cat_id.
+  "wp:term_id"?: number;
+  "wp:cat_id"?: number;
   "wp:cat_name": string;
   "wp:category_nicename": string;
   "wp:category_description"?: string;
+}
+
+/** Category term id across WXR versions (term_id in 1.2, cat_id in ancient exports). */
+function catTermId(cat: WxrCategory): number {
+  return Number(cat["wp:term_id"] ?? cat["wp:cat_id"]);
 }
 
 interface WxrTag {
@@ -162,11 +170,11 @@ function parseWxr(filePath: string) {
   const parser = new XMLParser({
     ignoreAttributes: false,
     attributeNamePrefix: "@_",
-    // NOTE: do NOT set cdataPropName here. WXR wraps post_type, status, cat_name,
+    // NOTE: do NOT set cdataPropName here. WXR wraps post_type, status, names,
     // content:encoded, etc. in CDATA; with cdataPropName those parse as objects
     // ({ "#text": ... }), so string comparisons like post_type === "post" silently
-    // fail (yielding 0 posts) and names import as "[object Object]". Default
-    // handling parses CDATA as plain strings, which is what the rest of this script expects.
+    // fail (the importer reports 0 posts) and names import as "[object Object]".
+    // Default handling parses CDATA as plain strings, which this script expects.
     isArray: (name) =>
       ["item", "wp:category", "wp:tag", "wp:postmeta", "category"].includes(name),
   });
@@ -187,7 +195,8 @@ function parseWxr(filePath: string) {
 
 async function downloadAndUpload(
   url: string,
-  adminUserId: string
+  adminUserId: string,
+  wpId: number
 ): Promise<{ id: number; url: string } | null> {
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(15_000) });
@@ -195,20 +204,30 @@ async function downloadAndUpload(
 
     const contentType = res.headers.get("content-type") ?? "application/octet-stream";
     const urlPath = new URL(url).pathname;
-    const fileName = path.basename(urlPath) || "attachment";
+    let fileName = path.basename(urlPath) || "attachment";
     const buffer = Buffer.from(await res.arrayBuffer());
 
     const storage = getStorage();
-    const { url: storedUrl, storageKey } = await storage.upload(buffer, fileName, contentType);
+    let uploaded: { url: string; storageKey: string };
+    try {
+      uploaded = await storage.upload(buffer, fileName, contentType);
+    } catch {
+      // Duplicate basename: WP exports can contain the same filename in different
+      // month folders, and providers like Vercel Blob refuse to overwrite an
+      // existing pathname. Retry once under a name made unique by the WP post id.
+      fileName = `${wpId}-${fileName}`;
+      uploaded = await storage.upload(buffer, fileName, contentType);
+    }
 
     const [row] = await db
       .insert(media)
       .values({
         fileName,
-        fileType: contentType,
+        // Pugmill's media.file_type is varchar(50); office MIME types run ~70 chars.
+        fileType: contentType.slice(0, 50),
         fileSize: buffer.byteLength,
-        url: storedUrl,
-        storageKey,
+        url: uploaded.url,
+        storageKey: uploaded.storageKey,
         uploaderId: adminUserId,
       } as typeof media.$inferInsert)
       .returning({ id: media.id, url: media.url });
@@ -280,7 +299,7 @@ async function main() {
       .limit(1);
 
     if (existing) {
-      categoryMap.set(Number(cat["wp:cat_id"]), existing.id);
+      categoryMap.set(catTermId(cat), existing.id);
       console.log(`  skip (exists): ${name}`);
     } else {
       const [row] = await db
@@ -291,7 +310,7 @@ async function main() {
           description: String(cat["wp:category_description"] ?? ""),
         } as typeof categories.$inferInsert)
         .returning({ id: categories.id });
-      categoryMap.set(Number(cat["wp:cat_id"]), row.id);
+      categoryMap.set(catTermId(cat), row.id);
       console.log(`  created: ${name} (${slug})`);
     }
   }
@@ -338,7 +357,7 @@ async function main() {
     if (!url) continue;
 
     process.stdout.write(`  ${path.basename(url)}... `);
-    const result = await downloadAndUpload(String(url), adminUserId);
+    const result = await downloadAndUpload(String(url), adminUserId, wpId);
     if (result) {
       mediaMap.set(wpId, result.id);
       mediaUrlMap.set(String(url), result.url);
@@ -432,7 +451,7 @@ async function main() {
         (c) => String(c["wp:category_nicename"]) === cat["@_nicename"]
       );
       if (!wpCat) continue;
-      const pugmillCatId = categoryMap.get(Number(wpCat["wp:cat_id"]));
+      const pugmillCatId = categoryMap.get(catTermId(wpCat));
       if (!pugmillCatId) continue;
       await pool.query(
         "INSERT INTO post_categories (post_id, category_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
