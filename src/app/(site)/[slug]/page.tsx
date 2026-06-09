@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { posts, postCategories, postTags, categories, tags } from "@/lib/db/schema";
 import { eq, and, ne } from "drizzle-orm";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getConfig } from "@/lib/config";
 import { sanitizeThemeName } from "@/lib/theme-registry";
 import { getDesignConfig } from "@/lib/design-config";
@@ -95,7 +95,18 @@ export default async function GenericPage(
     where: and(eq(posts.slug, slug), eq(posts.type, "page"), eq(posts.published, true)),
   });
 
-  if (!page) notFound();
+  if (!page) {
+    // WordPress-era URLs: posts used to live at /<slug>, but Pugmill serves them
+    // at /post/<slug>. 308-redirect so inbound links and search rankings survive
+    // the migration. Same for the old /feed RSS endpoint.
+    const post = await db.query.posts.findFirst({
+      where: and(eq(posts.slug, slug), eq(posts.type, "post"), eq(posts.published, true)),
+      columns: { slug: true },
+    });
+    if (post) permanentRedirect(`/post/${post.slug}`);
+    if (slug === "feed") permanentRedirect("/feed.xml");
+    notFound();
+  }
 
   const [config, cookieStore] = await Promise.all([getConfig(), cookies()]);
   const activeTheme = sanitizeThemeName(config.appearance.activeTheme);
