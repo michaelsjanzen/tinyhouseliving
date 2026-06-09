@@ -13,6 +13,8 @@ import { getCurrentUser } from "../../src/lib/get-current-user";
 import { createNotification, deleteNotificationByReplaceKey } from "../../src/lib/notifications";
 import { getUnreadCount } from "./db";
 import { submissionLimiter, SUBMISSION_RATE_LIMIT } from "../../src/lib/rate-limit";
+import { verifyFormToken } from "../../src/lib/form-protection";
+import { verifyTurnstile } from "../../src/lib/turnstile";
 import { auditLog } from "../../src/lib/audit-log";
 
 async function requireAdmin() {
@@ -66,6 +68,36 @@ export async function submitContactForm(
     return { status: "success", message: successMessage };
   }
 
+  // Signed token (proof the form was rendered) + timing trap. Issued by
+  // ContactFormSection via issueFormToken("contact-form").
+  const tokenCheck = verifyFormToken(formData.get("_t") as string, "contact-form");
+  if (!tokenCheck.ok) {
+    const reason = tokenCheck.reason;
+    // Always log so a misfire is never invisible (this gate sits before save+email).
+    console.warn(`[contact-form] form-protection token check failed: ${reason}`);
+
+    if (reason === "expired") {
+      // Likely a real visitor who left the tab open — tell them how to recover.
+      return {
+        status: "error",
+        message: "This form expired. Please refresh the page and send your message again.",
+      };
+    }
+
+    // Only silently drop the UNAMBIGUOUS bot signals. A real browser on this
+    // force-dynamic page always receives a valid token, so a missing/forged/
+    // wrong-form token means a direct POST that never loaded the form.
+    if (reason === "missing" || reason === "malformed" || reason === "bad_signature" || reason === "wrong_form") {
+      // Mirror the honeypot: report success so the bot learns nothing.
+      return { status: "success", message: successMessage };
+    }
+
+    // reason === "too_fast": a genuinely quick human can trip the 3s timing
+    // floor. Silently losing a real contact message is worse than letting a fast
+    // submitter through (the honeypot and per-IP rate limiter still apply), so
+    // fall through and process the submission normally.
+  }
+
   const name = (formData.get("name") as string)?.trim() ?? "";
   const email = (formData.get("email") as string)?.trim() ?? "";
   const phone = showPhone ? ((formData.get("phone") as string)?.trim() || null) : null;
@@ -85,6 +117,20 @@ export async function submitContactForm(
   if (!message) return { status: "error", message: "Message is required." };
   if (message.length > 5000) {
     return { status: "error", message: "Message is too long (max 5000 characters)." };
+  }
+
+  // Cloudflare Turnstile — checked AFTER field validation so a validation error
+  // doesn't consume the single-use token (the user's corrected resubmit reuses
+  // it). No-op unless both Turnstile keys are configured. On failure we return a
+  // visible error rather than silently dropping, so a real visitor who fails the
+  // challenge can retry instead of losing their message.
+  const turnstile = await verifyTurnstile(formData.get("cf-turnstile-response") as string, ip);
+  if (!turnstile.ok) {
+    console.warn(`[contact-form] Turnstile verification failed: ${turnstile.reason}`);
+    return {
+      status: "error",
+      message: "We couldn't verify your submission. Please refresh the page and try again.",
+    };
   }
 
   try {

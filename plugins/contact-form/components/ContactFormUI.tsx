@@ -2,12 +2,17 @@
 
 import { useActionState } from "react";
 import { submitContactForm, type ContactFormState } from "../actions";
+import TurnstileWidget from "./TurnstileWidget";
 
 interface Props {
   showPhone: boolean;
   requirePhone: boolean;
   showSocialUrl: boolean;
   requireSocialUrl: boolean;
+  /** Signed anti-bot token issued server-side; verified on submit. */
+  token: string;
+  /** Cloudflare Turnstile site key, or "" when Turnstile is not configured. */
+  turnstileSiteKey: string;
 }
 
 const initial: ContactFormState = { status: "idle", message: "" };
@@ -49,7 +54,7 @@ function TextInput({ id, name, type = "text", required, maxLength, autoComplete,
   );
 }
 
-export default function ContactFormUI({ showPhone, requirePhone, showSocialUrl, requireSocialUrl }: Props) {
+export default function ContactFormUI({ showPhone, requirePhone, showSocialUrl, requireSocialUrl, token, turnstileSiteKey }: Props) {
   const [state, action, isPending] = useActionState(submitContactForm, initial);
 
   if (state.status === "success") {
@@ -71,6 +76,8 @@ export default function ContactFormUI({ showPhone, requirePhone, showSocialUrl, 
     <form action={action} className="space-y-4">
       {/* Honeypot — hidden from real users, filled by bots */}
       <input type="text" name="_hp" tabIndex={-1} aria-hidden="true" className="hidden" />
+      {/* Signed anti-bot token (proof the form was actually rendered) */}
+      <input type="hidden" name="_t" value={token} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
@@ -117,6 +124,11 @@ export default function ContactFormUI({ showPhone, requirePhone, showSocialUrl, 
           style={fieldStyle}
         />
       </div>
+
+      {/* Cloudflare Turnstile — invisible bot challenge, only when configured.
+          Renders explicitly and submits the token via a React-controlled
+          `cf-turnstile-response` field that the server action verifies. */}
+      {turnstileSiteKey && <TurnstileWidget siteKey={turnstileSiteKey} />}
 
       {state.status === "error" && (
         <p className="text-sm" style={{ color: "#dc2626" }}>
