@@ -28,6 +28,7 @@ const { values: args } = parseArgs({
   options: {
     file:    { type: "string" },
     env:     { type: "string", default: ".env.local" },
+    "media-dir": { type: "string" },
     "dry-run": { type: "boolean", default: false },
   },
 });
@@ -40,6 +41,44 @@ if (!args.file) {
 const DRY_RUN = args["dry-run"] ?? false;
 const ENV_PATH = path.resolve(process.cwd(), args.env!);
 const WXR_PATH = path.resolve(process.cwd(), args.file!);
+
+// Optional local media mirror (created by capture-media.mjs before the source
+// site went offline): <media-dir>/uploads/<wp path> + manifest.json (url -> path).
+// When set, media is read from disk first and only fetched live as a fallback.
+const MEDIA_DIR = args["media-dir"] ? path.resolve(process.cwd(), args["media-dir"]) : null;
+const mirrorUrlToPath = new Map<string, string>();
+if (MEDIA_DIR) {
+  const manifestPath = path.join(MEDIA_DIR, "manifest.json");
+  if (fs.existsSync(manifestPath)) {
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+    for (const f of manifest.files ?? []) {
+      if (f.ok) mirrorUrlToPath.set(f.url, path.join(MEDIA_DIR, f.path));
+    }
+  }
+}
+
+const EXT_MIME: Record<string, string> = {
+  jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", gif: "image/gif",
+  webp: "image/webp", svg: "image/svg+xml", avif: "image/avif", ico: "image/x-icon",
+  pdf: "application/pdf", mp4: "video/mp4", mov: "video/quicktime", mp3: "audio/mpeg",
+  zip: "application/zip", doc: "application/msword", docx: "application/msword",
+};
+
+/** Resolve a WP media URL to a file in the local mirror, if present. */
+function localMirrorFile(url: string): { buffer: Buffer; contentType: string } | null {
+  if (!MEDIA_DIR) return null;
+  let filePath = mirrorUrlToPath.get(url) ?? null;
+  if (!filePath) {
+    const m = url.match(/\/wp-content\/uploads\/(.+)$/);
+    if (m) {
+      const candidate = path.join(MEDIA_DIR, "uploads", decodeURIComponent(m[1]).replace(/\?.*$/, ""));
+      if (fs.existsSync(candidate)) filePath = candidate;
+    }
+  }
+  if (!filePath || !fs.existsSync(filePath)) return null;
+  const ext = path.extname(filePath).slice(1).toLowerCase();
+  return { buffer: fs.readFileSync(filePath), contentType: EXT_MIME[ext] ?? "application/octet-stream" };
+}
 
 // Load env before importing anything that reads process.env
 loadEnv({ path: ENV_PATH });
@@ -199,13 +238,19 @@ async function downloadAndUpload(
   wpId: number
 ): Promise<{ id: number; url: string } | null> {
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(15_000) });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-    const contentType = res.headers.get("content-type") ?? "application/octet-stream";
+    let buffer: Buffer;
+    let contentType: string;
+    const local = localMirrorFile(url);
+    if (local) {
+      ({ buffer, contentType } = local);
+    } else {
+      const res = await fetch(url, { signal: AbortSignal.timeout(15_000) });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      contentType = res.headers.get("content-type") ?? "application/octet-stream";
+      buffer = Buffer.from(await res.arrayBuffer());
+    }
     const urlPath = new URL(url).pathname;
     let fileName = path.basename(urlPath) || "attachment";
-    const buffer = Buffer.from(await res.arrayBuffer());
 
     const storage = getStorage();
     let uploaded: { url: string; storageKey: string };
